@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RCB — Royal Crying Brigade</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blood: #8B0000;
+    --gold-dead: #7a6832;
+    --gold-bright: #c9a84c;
+    --ash: #1a1a1a;
+    --smoke: #2a2a2a;
+    --bone: #e8e0d0;
+    --muted: #6b6558;
+    --black: #0d0d0d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'IM Fell English', Georgia, serif;
+    overflow-x: hidden;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ctext y='16' font-size='16'%3E🪦%3C/text%3E%3C/svg%3E") 10 10, auto;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    text-align: center;
+    background: radial-gradient(ellipse at center top, #1a0000 0%, #0d0d0d 60%);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(to bottom, transparent, var(--black));
+  }
+
+  .candles {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .candle {
+    position: absolute;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to top, var(--gold-dead), transparent);
+    animation: flicker 2s infinite ease-in-out;
+  }
+  .candle::after {
+    content: '🕯';
+    position: absolute;
+    top: -24px;
+    left: -10px;
+    font-size: 20px;
+    animation: flickerEmoji 1.5s infinite ease-in-out;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0.7; transform: scaleX(1); }
+    50% { opacity: 1; transform: scaleX(1.2); }
+  }
+  @keyframes flickerEmoji {
+    0%, 100% { transform: scale(1) rotate(-2deg); }
+    50% { transform: scale(1.1) rotate(2deg); }
+  }
+
+  .badge {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--blood);
+    border: 1px solid var(--blood);
+    padding: 0.3rem 1rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 1s ease forwards;
+    opacity: 0;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--blood);
+    text-shadow: 0 0 60px rgba(139,0,0,0.4);
+    animation: fadeInUp 1s ease 0.3s forwards;
+    opacity: 0;
+  }
+
+  .hero-sub {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(1rem, 3vw, 1.8rem);
+    font-style: italic;
+    color: var(--gold-dead);
+    margin: 1rem 0 0.5rem;
+    animation: fadeInUp 1s ease 0.5s forwards;
+    opacity: 0;
+  }
+
+  .hero-tagline {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    animation: fadeInUp 1s ease 0.7s forwards;
+    opacity: 0;
+  }
+
+  .trophy-void {
+    margin: 3rem auto 1rem;
+    width: 120px; height: 120px;
+    border: 2px solid var(--blood);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: fadeInUp 1s ease 0.9s forwards;
+    opacity: 0;
+  }
+  .trophy-void::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(139,0,0,0.3);
+  }
+  .trophy-void span {
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+  .trophy-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    animation: fadeInUp 1s ease 1s forwards;
+    opacity: 0;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    animation: bounce 2s infinite, fadeInUp 1s ease 1.5s forwards;
+    opacity: 0;
+  }
+
+  /* SECTIONS */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--blood);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--blood), transparent);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3rem;
+  }
+
+  /* LOSS COUNTER */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--smoke);
+    border: 1px solid var(--smoke);
+    margin-top: 2rem;
+  }
+
+  .stat-block {
+    background: var(--ash);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .stat-block:hover { background: #1f0000; }
+  .stat-block::after {
+    content: attr(data-emoji);
+    position: absolute;
+    bottom: -10px; right: -5px;
+    font-size: 4rem;
+    opacity: 0.07;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 900;
+    color: var(--blood);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    display: block;
+  }
+
+  .stat-note {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--gold-dead);
+    margin-top: 0.5rem;
+    display: block;
+  }
+
+  /* MEME GALLERY */
+  .meme-section {
+    background: var(--ash);
+    margin: 0;
+    max-width: 100%;
+    padding: 6rem 2rem;
+  }
+  .meme-inner { max-width: 1100px; margin: 0 auto; }
+
+  .meme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .meme-card {
+    border: 1px solid var(--smoke);
+    background: var(--black);
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .meme-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--blood);
+  }
+
+  .meme-top {
+    background: linear-gradient(135deg, #1a0000, #0d0d0d);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    min-height: 180px;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    border-bottom: 1px solid var(--smoke);
+  }
+
+  .meme-emoji { font-size: 3rem; margin-bottom: 0.5rem; display: block; }
+
+  .meme-headline {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bone);
+    line-height: 1.3;
+  }
+
+  .meme-body {
+    padding: 1.5rem;
+  }
+
+  .meme-quote {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--gold-dead);
+    line-height: 1.6;
+    border-left: 2px solid var(--blood);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .meme-caption {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* EE SARI WALL */
+  .promise-wall {
+    background: radial-gradient(ellipse at bottom, #0d0000, var(--black));
+    max-width: 100%;
+    margin: 0;
+    padding: 6rem 2rem;
+  }
+  .promise-inner { max-width: 1100px; margin: 0 auto; }
+
+  .promise-list {
+    margin-top: 3rem;
+    position: relative;
+  }
+
+  .promise-list::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--blood), transparent);
+  }
+
+  .promise-item {
+    padding: 2rem 0 2rem 3rem;
+    border-bottom: 1px solid var(--smoke);
+    position: relative;
+    transition: padding-left 0.3s;
+  }
+  .promise-item:hover { padding-left: 4rem; }
+  .promise-item::before {
+    content: '✞';
+    position: absolute;
+    left: -8px;
+    color: var(--blood);
+    font-size: 1rem;
+    background: var(--black);
+    padding: 2px;
+  }
+
+  .promise-year {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--blood);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .promise-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--bone);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .promise-outcome {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .outcome-fail { color: var(--blood); }
+
+  /* ADD YOUR PROMISE */
+  .add-promise {
+    margin-top: 4rem;
+    padding: 2.5rem;
+    border: 1px solid var(--smoke);
+    background: var(--ash);
+  }
+
+  .add-promise h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    color: var(--gold-dead);
+  }
+
+  .promise-form {
+    display: grid;
+    grid-template-columns: 1fr 120px auto;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .promise-form input, .promise-form select {
+    background: var(--black);
+    border: 1px solid var(--smoke);
+    color: var(--bone);
+    padding: 0.75rem 1rem;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .promise-form input:focus, .promise-form select:focus {
+    border-color: var(--blood);
+  }
+  .promise-form input::placeholder { color: var(--muted); font-style: italic; }
+
+  .btn-add {
+    background: var(--blood);
+    border: none;
+    color: var(--bone);
+    padding: 0.75rem 1.5rem;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .btn-add:hover { background: #a00000; }
+
+  #user-promises { margin-top: 2rem; }
+  .user-promise-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--smoke);
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .user-promise-item .cross { color: var(--blood); font-size: 1rem; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--smoke);
+    background: var(--black);
+  }
+
+  footer .epitaph {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  footer .small {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: #333;
+    text-transform: uppercase;
+  }
+
+  /* DIVIDER */
+  .divider {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex; align-items: center; gap: 1.5rem;
+    color: var(--blood); font-size: 0.7rem;
+    padding: 0 2rem;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--smoke);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(to bottom, rgba(13,13,13,0.95), transparent);
+    backdrop-filter: blur(10px);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--blood);
+    letter-spacing: 0.05em;
+  }
+  .nav-links {
+    display: flex; gap: 2rem; list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--bone); }
+
+  @media(max-width: 600px) {
+    .promise-form { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* TEARS animation */
+  .tear {
+    position: fixed;
+    top: -20px;
+    font-size: 1.2rem;
+    animation: fall linear forwards;
+    pointer-events: none;
+    z-index: 100;
+  }
+  @keyframes fall {
+    to { top: 110vh; opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">R.C.B.</div>
+  <ul class="nav-links">
+    <li><a href="#stats">Statistics</a></li>
+    <li><a href="#memes">Tributes</a></li>
+    <li><a href="#promises">Ee Sari Wall</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <!-- Candles -->
+  <div class="candles" id="candles"></div>
+
+  <div class="badge">Est. 2008 — Still Waiting</div>
+
+  <h1 class="hero-title">R.C.B.</h1>
+  <p class="hero-sub">Royal Crying Brigade</p>
+  <p class="hero-tagline">✞ &nbsp; In Eternal Suffering Since 2008 &nbsp; ✞</p>
+
+  <div class="trophy-void">
+    <span>🏆</span>
+  </div>
+  <p class="trophy-label">Trophy Cabinet — Current Inventory</p>
+
+  <p class="scroll-hint">↓ &nbsp; scroll to mourn &nbsp; ↓</p>
+</div>
+
+<!-- STATS -->
+<section id="stats" class="reveal">
+  <div class="section-label">The Obituary</div>
+  <h2 class="section-title">A Chronicle of<br><em>Beautiful Suffering</em></h2>
+
+  <div class="stats-grid">
+    <div class="stat-block" data-emoji="💀">
+      <span class="stat-num">1</span>
+      <span class="stat-label">IPL Titles Won</span>
+      <span class="stat-note">in 17 glorious attempts</span>
+    </div>
+    <div class="stat-block" data-emoji="😭">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Finals Reached</span>
+      <span class="stat-note">& lost, dramatically</span>
+    </div>
+    <div class="stat-block" data-emoji="🪦">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">"Ee Sari" Promises</span>
+      <span class="stat-note">issued by fans, unfulfilled</span>
+    </div>
+    <div class="stat-block" data-emoji="🔥">
+      <span class="stat-num">17</span>
+      <span class="stat-label">Years of Heartbreak</span>
+      <span class="stat-note">and still counting...</span>
+    </div>
+    <div class="stat-block" data-emoji="🎭">
+      <span class="stat-num">500+</span>
+      <span class="stat-label">Crores Spent</span>
+      <span class="stat-note">on very expensive tears</span>
+    </div>
+    <div class="stat-block" data-emoji="🙏">
+      <span class="stat-num">1</span>
+      <span class="stat-label">Kohli Era</span>
+      <span class="stat-note">he left. trophy didn't come.</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider reveal">✞ &nbsp; In Memoriam &nbsp; ✞</div>
+
+<!-- MEMES / TRIBUTES -->
+<div class="meme-section">
+  <div class="meme-inner">
+    <div class="section-label">Field Reports</div>
+    <h2 class="section-title">Testimonials From<br><em>The Grieving</em></h2>
+
+    <div class="meme-grid reveal">
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">⚰️</span>
+          <p class="meme-headline">The Trophy Cabinet<br>— A Still Life</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"We have the best players. We have the best fans. We have... absolutely zero trophies."</p>
+          <p class="meme-caption">— Every RCB season, 2008–2024</p>
+        </div>
+      </div>
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">😤</span>
+          <p class="meme-headline">The Kohli Paradox</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"World's greatest batter. 17 years. One team. Zero IPL titles. Science cannot explain this."</p>
+          <p class="meme-caption">— Cricket analysts, in tears</p>
+        </div>
+      </div>
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">📉</span>
+          <p class="meme-headline">The Annual Ritual</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"RCB: wins 3 games, fans scream 'ee sari', loses next 4, fans weep, season ends. Repeat forever."</p>
+          <p class="meme-caption">— The cycle of grief (IPL edition)</p>
+        </div>
+      </div>
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">🏆</span>
+          <p class="meme-headline">The Valluvan Trophy</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"RCB finally won something in 2024... a Women's IPL title. The men nodded respectfully and went back to losing."</p>
+          <p class="meme-caption">— History, undefeated</p>
+        </div>
+      </div>
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">💸</span>
+          <p class="meme-headline">Auction Strategy<br>Masterclass</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"Buy one legendary batter, seven medium pacers, spend entire purse. Lose qualifier. Build character."</p>
+          <p class="meme-caption">— RCB team-building manual (unofficial)</p>
+        </div>
+      </div>
+
+      <div class="meme-card">
+        <div class="meme-top">
+          <span class="meme-emoji">😇</span>
+          <p class="meme-headline">The Fan's Prayer</p>
+        </div>
+        <div class="meme-body">
+          <p class="meme-quote">"Dear God, I've been patient. It's been 17 years. Even Thanos snapped after 6 infinity stones. I just want one cup."</p>
+          <p class="meme-caption">— RCB fan, 2:47 AM, sobbing</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="divider reveal">✞ &nbsp; They Promised &nbsp; ✞</div>
+
+<!-- EE SARI WALL -->
+<div class="promise-wall">
+  <div class="promise-inner">
+    <div class="section-label">Sacred Vows</div>
+    <h2 class="section-title">The <em>"Ee Sari"</em><br>Wall of Broken Dreams</h2>
+    <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--muted); max-width:500px; line-height:1.8; font-size:0.95rem;">
+      A solemn monument to every time an RCB fan said the words — and the universe simply said, "no."
+    </p>
+
+    <div class="promise-list reveal" id="main-promises">
+
+      <div class="promise-item">
+        <p class="promise-year">The Promise — Eternal</p>
+        <p class="promise-text">"Ee Sari Ma
